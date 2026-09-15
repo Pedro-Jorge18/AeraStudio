@@ -1,0 +1,204 @@
+:root {
+    --fundo: #0f1620;
+    --fundo-cartao: #161f2c;
+    --border: #263241;
+    --texto: #e8ecf1;
+    --texto-suave: #8b97a6;
+    --acento: #caa15d;
+    --aviso: #d9a441;
+    --erro: #e0685a;
+    --sucesso: #5fa878;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    background: var(--fundo);
+    color: var(--texto);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.5;
+}
+
+a { color: var(--acento); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.topo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+}
+
+.topo-marca {
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    font-size: 18px;
+    color: var(--texto);
+}
+.topo-marca span { color: var(--acento); font-weight: 400; }
+.topo-marca:hover { text-decoration: none; }
+
+.topo nav { display: flex; gap: 18px; flex-wrap: wrap; }
+.topo nav a { color: var(--texto-suave); font-size: 14px; }
+.topo nav a:hover { color: var(--texto); text-decoration: none; }
+.topo nav a.ativo { color: var(--acento); }
+
+.conteudo {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 24px;
+}
+
+h1 { font-size: 22px; margin: 0 0 20px; }
+h2 { font-size: 16px; margin: 0 0 14px; }
+
+.cartao {
+    background: var(--fundo-cartao);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin-bottom: 20px;
+}
+
+a.cartao, a.ligacao-cartao {
+    display: block;
+    color: var(--texto);
+}
+a.cartao:hover, a.ligacao-cartao:hover {
+    border-color: var(--acento);
+    text-decoration: none;
+}
+
+.grelha-resumo {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+}
+
+.resumo-numero {
+    text-align: center;
+}
+.resumo-numero .numero {
+    display: block;
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--acento);
+}
+.resumo-numero .rotulo {
+    display: block;
+    font-size: 13px;
+    color: var(--texto-suave);
+    margin-top: 4px;
+}
+
+.lista-simples {
+    list-style: none;
+    margin: 0 0 12px;
+    padding: 0;
+    font-size: 14px;
+}
+.lista-simples li {
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border);
+}
+.lista-simples li:last-child { border-bottom: none; }
+
+.ligacao-modulo {
+    display: inline-block;
+    margin-top: 8px;
+    font-size: 13px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+th, td {
+    text-align: left;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border);
+}
+th { color: var(--texto-suave); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; }
+
+.texto-suave { color: var(--texto-suave); }
+
+.vazio { color: var(--texto-suave); font-size: 14px; }
+
+.pilula {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 999px;
+    background: var(--border);
+    color: var(--texto);
+    font-size: 12px;
+}
+.pilula.aviso {
+    background: rgba(217, 164, 65, 0.15);
+    color: var(--aviso);
+}
+
+.mensagem-sucesso {
+    padding: 12px 16px;
+    border: 1px solid var(--sucesso);
+    border-radius: 8px;
+    color: var(--sucesso);
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
+label {
+    display: block;
+    font-size: 13px;
+    color: var(--texto-suave);
+    margin-top: 14px;
+    margin-bottom: 4px;
+}
+label:first-of-type { margin-top: 0; }
+
+input, select, textarea {
+    width: 100%;
+    padding: 8px 10px;
+    background: var(--fundo);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--texto);
+    font-size: 14px;
+    font-family: inherit;
+}
+textarea { min-height: 70px; resize: vertical; }
+
+.checkbox { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--texto); }
+.checkbox input { width: auto; }
+
+fieldset {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-top: 16px;
+    padding: 4px 14px 14px;
+}
+legend { color: var(--texto-suave); font-size: 13px; padding: 0 6px; }
+
+button {
+    margin-top: 18px;
+    padding: 10px 18px;
+    background: var(--acento);
+    color: #16130c;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+button:hover { opacity: 0.9; }
+
+.rodape {
+    text-align: center;
+    color: var(--texto-suave);
+    font-size: 12px;
+    padding: 24px;
+}
