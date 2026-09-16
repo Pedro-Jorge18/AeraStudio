@@ -21,6 +21,8 @@ $pagina_atual = basename($_SERVER['SCRIPT_NAME'] ?? '');
         <a href="locais.php" <?= $pagina_atual === 'locais.php' ? 'class="ativo"' : '' ?>>Locais</a>
         <a href="recomendacao.php" <?= $pagina_atual === 'recomendacao.php' ? 'class="ativo"' : '' ?>>Próximo destino</a>
         <a href="repeticao.php" <?= $pagina_atual === 'repeticao.php' ? 'class="ativo"' : '' ?>>Alerta de repetição</a>
+        <a href="documentos.php" <?= $pagina_atual === 'documentos.php' ? 'class="ativo"' : '' ?>>Documentos</a>
+        <a href="painel_controlo.php" <?= $pagina_atual === 'painel_controlo.php' ? 'class="ativo"' : '' ?>>Painel de Controlo</a>
     </nav>
 </header>
 <main class="conteudo">

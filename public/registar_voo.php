@@ -28,6 +28,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
+// --- Fase 2: verificação de compliance (seguro e AAN válidos) ---
+$hoje = date('Y-m-d');
+$documentos_criticos = ['seguro' => 'Seguro de responsabilidade civil', 'aan' => 'Autorização de Operador (AAN)'];
+$avisos_compliance = [];
+foreach ($documentos_criticos as $tipo => $rotulo) {
+    $stmt = $pdo->prepare(
+        "SELECT data_validade FROM documentos
+         WHERE tipo = :tipo AND (data_validade IS NULL OR data_validade >= :hoje)
+         ORDER BY data_validade IS NULL, data_validade DESC LIMIT 1"
+    );
+    $stmt->execute(['tipo' => $tipo, 'hoje' => $hoje]);
+    $valido = $stmt->fetchColumn();
+    if ($valido === false) {
+        $avisos_compliance[] = "{$rotulo} — sem registo válido (em falta ou expirado).";
+    }
+}
+
 $locais = $pdo->query('SELECT id, nome FROM locais ORDER BY nome ASC')->fetchAll();
 
 $voos_recentes = $pdo->query(
@@ -45,6 +62,18 @@ require __DIR__ . '/../includes/layout_topo.php';
 <?php endif; ?>
 <?php if ($erro): ?>
     <div class="mensagem-sucesso" style="border-color:var(--erro); color:var(--erro);"><?= htmlspecialchars($erro) ?></div>
+<?php endif; ?>
+
+<?php if ($avisos_compliance): ?>
+    <div class="cartao" style="border-color:var(--erro);">
+        <h2 style="color:var(--erro);">⚠ Compliance em falta</h2>
+        <ul>
+            <?php foreach ($avisos_compliance as $aviso): ?>
+                <li class="texto-suave"><?= htmlspecialchars($aviso) ?></li>
+            <?php endforeach; ?>
+        </ul>
+        <p class="texto-suave">Podes continuar a registar o voo, mas confirma isto em <a href="documentos.php">Documentos</a> antes de voar.</p>
+    </div>
 <?php endif; ?>
 
 <div class="cartao">

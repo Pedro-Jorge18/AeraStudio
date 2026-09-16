@@ -41,5 +41,20 @@ CREATE TABLE IF NOT EXISTS publicacoes (
     criado_em TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
+CREATE TABLE IF NOT EXISTS documentos (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    tipo TEXT NOT NULL,
+    nome TEXT NOT NULL,
+    entidade_emissora TEXT,
+    numero_referencia TEXT,
+    data_emissao TEXT,
+    data_validade TEXT,
+    local_id INTEGER REFERENCES locais(id),
+    notas TEXT,
+    criado_em TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
 CREATE INDEX IF NOT EXISTS idx_voos_local ON voos(local_id);
 CREATE INDEX IF NOT EXISTS idx_publicacoes_voo ON publicacoes(voo_id);
+CREATE INDEX IF NOT EXISTS idx_documentos_tipo ON documentos(tipo);
+CREATE INDEX IF NOT EXISTS idx_documentos_local ON documentos(local_id);
