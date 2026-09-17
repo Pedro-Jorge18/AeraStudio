@@ -1,0 +1,74 @@
+---
+import OpsLayout from '../layouts/OpsLayout.astro';
+import { db } from '../lib/db';
+
+const pdo = db();
+const params = Astro.url.searchParams;
+const janela = params.get('janela') ?? '';
+const so_por_filmar = params.has('so_por_filmar');
+
+let sql = `SELECT l.*,
+                  (SELECT COUNT(*) FROM voos v WHERE v.local_id = l.id) AS num_voos,
+                  (SELECT MAX(v.data) FROM voos v WHERE v.local_id = l.id) AS ultima_vez_filmado
+           FROM locais l`;
+
+// Sexta à tarde: só locais com viagem curta (<60min ida).
+if (janela === 'sexta_tarde') {
+  sql += ' WHERE l.tempo_viagem_min IS NOT NULL AND l.tempo_viagem_min < 60';
+}
+sql += ' ORDER BY (ultima_vez_filmado IS NOT NULL), ultima_vez_filmado ASC, l.tempo_viagem_min ASC';
+
+let todos = pdo.prepare(sql).all() as any[];
+if (so_por_filmar) {
+  todos = todos.filter((l: any) => Number(l.num_voos) === 0);
+}
+const top3 = todos.slice(0, 3);
+
+const rotulos_tipo: Record<string, string> = {
+  serra: 'Serra', parque: 'Parque', vale_rio: 'Vale/rio',
+  vila_historica: 'Vila histórica', quinta: 'Quinta', urbano: 'Urbano', outro: 'Outro',
+};
+---
+<OpsLayout titulo="Próximo destino">
+  <div class="cartao">
+    <h2>Que disponibilidade têm agora?</h2>
+    <form method="get" style="display:flex; gap:14px; align-items:flex-end; flex-wrap:wrap;">
+      <div>
+        <label for="janela">Janela</label>
+        <select name="janela" id="janela">
+          <option value="" selected={janela === ''}>Qualquer</option>
+          <option value="sexta_tarde" selected={janela === 'sexta_tarde'}>Sexta à tarde (só locais &lt;1h)</option>
+          <option value="sabado" selected={janela === 'sabado'}>Sábado</option>
+          <option value="domingo" selected={janela === 'domingo'}>Domingo</option>
+        </select>
+      </div>
+      <label class="checkbox" style="margin-bottom:14px;">
+        <input type="checkbox" name="so_por_filmar" value="1" checked={so_por_filmar} />
+        Só locais nunca filmados
+      </label>
+      <button type="submit" style="margin-top:0;">Sugerir</button>
+    </form>
+  </div>
+
+  <div class="cartao">
+    <h2>Top 3 sugestões</h2>
+    {top3.length === 0 ? (
+      <p class="vazio">Sem locais que cumpram estes critérios — tenta relaxar o filtro.</p>
+    ) : (
+      top3.map((l: any, i: number) => (
+        <div style={`padding: 12px 0; ${i > 0 ? 'border-top:1px solid var(--border);' : ''}`}>
+          <strong>#{i + 1} — {l.nome}</strong>
+          {Number(l.num_voos) === 0 ? <> <span class="pilula aviso">nunca filmado</span></> : null}
+          <div class="texto-suave" style="margin-top:4px;">
+            {rotulos_tipo[l.tipo] ?? l.tipo}
+            {' · '}{l.concelho ?? ''}
+            {' · '}{l.tempo_viagem_min ? l.tempo_viagem_min + ' min de viagem' : 'tempo de viagem não definido'}
+            {' · custo: '}{l.custo_estimado || '0'}
+            {l.ultima_vez_filmado ? <>{' · última vez: '}{l.ultima_vez_filmado}</> : null}
+          </div>
+          {l.notas ? <div class="texto-suave" style="margin-top:4px; font-size:13px;">{l.notas}</div> : null}
+        </div>
+      ))
+    )}
+  </div>
+</OpsLayout>

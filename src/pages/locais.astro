@@ -1,0 +1,48 @@
+---
+import OpsLayout from '../layouts/OpsLayout.astro';
+import { db } from '../lib/db';
+
+const pdo = db();
+
+const locais = pdo
+  .prepare(
+    `SELECT l.*,
+            (SELECT COUNT(*) FROM voos v WHERE v.local_id = l.id) AS num_voos,
+            (SELECT MAX(v.data) FROM voos v WHERE v.local_id = l.id) AS ultima_vez_filmado
+     FROM locais l
+     ORDER BY num_voos ASC, l.nome ASC`,
+  )
+  .all() as any[];
+
+const rotulos_tipo: Record<string, string> = {
+  serra: 'Serra', parque: 'Parque', vale_rio: 'Vale/rio',
+  vila_historica: 'Vila histórica', quinta: 'Quinta', urbano: 'Urbano', outro: 'Outro',
+};
+---
+<OpsLayout titulo="Locais">
+  <div class="cartao">
+    <h2>Catálogo de locais ({locais.length})</h2>
+    <table>
+      <tr>
+        <th>Nome</th><th>Tipo</th><th>Distrito</th><th>Andante?</th><th>Tempo viagem</th><th>Voos</th><th>Última vez filmado</th>
+      </tr>
+      {locais.map((l: any) => (
+        <tr>
+          <td>{l.nome}{l.requer_autorizacao_privada ? <> <span class="pilula aviso">autorização</span></> : null}</td>
+          <td>{rotulos_tipo[l.tipo] ?? l.tipo}</td>
+          <td class="texto-suave">{l.distrito ?? '—'}</td>
+          <td>{l.dentro_distrito_porto ? 'Sim' : 'Não'}</td>
+          <td class="texto-suave">{l.tempo_viagem_min ? l.tempo_viagem_min + ' min' : '—'}</td>
+          <td>
+            {Number(l.num_voos) === 0 ? (
+              <span class="pilula aviso">por filmar</span>
+            ) : (
+              <span class="pilula">{l.num_voos}</span>
+            )}
+          </td>
+          <td class="texto-suave">{l.ultima_vez_filmado ?? '—'}</td>
+        </tr>
+      ))}
+    </table>
+  </div>
+</OpsLayout>

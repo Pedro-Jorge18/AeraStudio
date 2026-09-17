@@ -1,0 +1,44 @@
+---
+// Layout do back-office (equivalente a includes/layout_topo.php + layout_fim.php).
+interface Props {
+  titulo?: string;
+}
+const { titulo = 'AERA Studio Ops' } = Astro.props;
+const path = Astro.url.pathname;
+const ativo = (p: string) => (path === p ? 'ativo' : '');
+---
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{titulo} · AERA Studio Ops</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,600&display=swap" />
+  <link rel="stylesheet" href="/estilo.css" />
+</head>
+<body>
+<header class="topo">
+  <a class="topo-marca" href="/">AERA <span>Studio</span></a>
+  <nav>
+    <a href="/" class={`inicio-link${path === '/' ? ' ativo' : ''}`}>Início</a>
+    <a href="/painel" class={ativo('/painel')}>Painel</a>
+    <a href="/registar_voo" class={ativo('/registar_voo')}>Registar voo</a>
+    <a href="/registar_publicacao" class={ativo('/registar_publicacao')}>Registar publicação</a>
+    <a href="/locais" class={ativo('/locais')}>Locais</a>
+    <a href="/recomendacao" class={ativo('/recomendacao')}>Próximo destino</a>
+    <a href="/repeticao" class={ativo('/repeticao')}>Alerta de repetição</a>
+    <a href="/documentos" class={ativo('/documentos')}>Documentos</a>
+    <a href="/painel_controlo" class={ativo('/painel_controlo')}>Painel de Controlo</a>
+  </nav>
+</header>
+<main class="conteudo">
+  <h1>{titulo}</h1>
+  <slot />
+</main>
+<footer class="rodape">
+  <p>AERA Studio Ops — Fase 1</p>
+</footer>
+</body>
+</html>

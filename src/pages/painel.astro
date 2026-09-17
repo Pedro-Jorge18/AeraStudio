@@ -1,0 +1,96 @@
+---
+import OpsLayout from '../layouts/OpsLayout.astro';
+import { db } from '../lib/db';
+
+const pdo = db();
+
+const num_locais = (pdo.prepare('SELECT COUNT(*) AS n FROM locais').get() as any).n as number;
+const num_voos = (pdo.prepare('SELECT COUNT(*) AS n FROM voos').get() as any).n as number;
+const num_publicacoes = (pdo.prepare('SELECT COUNT(*) AS n FROM publicacoes').get() as any).n as number;
+const num_por_filmar = (pdo
+  .prepare('SELECT COUNT(*) AS n FROM locais l WHERE NOT EXISTS (SELECT 1 FROM voos v WHERE v.local_id = l.id)')
+  .get() as any).n as number;
+
+const ultimos_voos = pdo
+  .prepare('SELECT v.data, l.nome AS local_nome FROM voos v JOIN locais l ON l.id = v.local_id ORDER BY v.data DESC, v.id DESC LIMIT 5')
+  .all() as any[];
+
+const ultimas_publicacoes = pdo
+  .prepare(
+    `SELECT p.data_publicacao, p.plataforma, l.nome AS local_nome
+     FROM publicacoes p LEFT JOIN voos v ON v.id = p.voo_id LEFT JOIN locais l ON l.id = v.local_id
+     ORDER BY p.data_publicacao DESC, p.id DESC LIMIT 5`,
+  )
+  .all() as any[];
+
+const ultimas_duas = pdo
+  .prepare('SELECT data_publicacao, formato_conteudo FROM publicacoes ORDER BY data_publicacao DESC, id DESC LIMIT 2')
+  .all() as any[];
+
+let aviso_consecutivo: string | null = null;
+if (
+  ultimas_duas.length === 2 &&
+  ultimas_duas[0].formato_conteudo &&
+  ultimas_duas[0].formato_conteudo === ultimas_duas[1].formato_conteudo
+) {
+  aviso_consecutivo = ultimas_duas[0].formato_conteudo;
+}
+---
+<OpsLayout titulo="Painel">
+  {aviso_consecutivo && (
+    <div class="mensagem-sucesso" style="border-color:var(--aviso); color:var(--aviso);">
+      As duas últimas publicações repetem o formato "{aviso_consecutivo}". Vê o <a href="/repeticao">alerta de repetição</a> antes do próximo vídeo.
+    </div>
+  )}
+
+  <div class="grelha-resumo">
+    <div class="cartao resumo-numero"><span class="numero">{num_locais}</span><span class="rotulo">Locais no catálogo</span></div>
+    <div class="cartao resumo-numero"><span class="numero">{num_voos}</span><span class="rotulo">Voos registados</span></div>
+    <div class="cartao resumo-numero"><span class="numero">{num_publicacoes}</span><span class="rotulo">Publicações registadas</span></div>
+    <div class="cartao resumo-numero"><span class="numero">{num_por_filmar}</span><span class="rotulo">Locais por filmar</span></div>
+  </div>
+
+  <div class="grelha-resumo">
+    <div class="cartao">
+      <h2>Últimos voos</h2>
+      {ultimos_voos.length === 0 ? (
+        <p class="vazio">Ainda não há voos registados.</p>
+      ) : (
+        <ul class="lista-simples">
+          {ultimos_voos.map((v: any) => (
+            <li><span class="texto-suave">{v.data}</span> — {v.local_nome}</li>
+          ))}
+        </ul>
+      )}
+      <a class="ligacao-modulo" href="/registar_voo">Registar novo voo →</a>
+    </div>
+    <div class="cartao">
+      <h2>Últimas publicações</h2>
+      {ultimas_publicacoes.length === 0 ? (
+        <p class="vazio">Ainda não há publicações registadas.</p>
+      ) : (
+        <ul class="lista-simples">
+          {ultimas_publicacoes.map((p: any) => (
+            <li><span class="texto-suave">{p.data_publicacao}</span> — {p.local_nome ?? '—'} ({p.plataforma})</li>
+          ))}
+        </ul>
+      )}
+      <a class="ligacao-modulo" href="/registar_publicacao">Registar nova publicação →</a>
+    </div>
+  </div>
+
+  <div class="grelha-resumo">
+    <a class="cartao ligacao-cartao" href="/locais">
+      <h2>Locais</h2>
+      <p class="texto-suave">Catálogo completo, com estado de "por filmar".</p>
+    </a>
+    <a class="cartao ligacao-cartao" href="/recomendacao">
+      <h2>Próximo destino</h2>
+      <p class="texto-suave">Sugestão de top 3 locais consoante a disponibilidade.</p>
+    </a>
+    <a class="cartao ligacao-cartao" href="/repeticao">
+      <h2>Alerta de repetição</h2>
+      <p class="texto-suave">Vê há quanto tempo não repetem cada ângulo, por local.</p>
+    </a>
+  </div>
+</OpsLayout>

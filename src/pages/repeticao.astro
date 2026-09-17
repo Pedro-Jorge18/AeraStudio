@@ -1,0 +1,78 @@
+---
+import OpsLayout from '../layouts/OpsLayout.astro';
+import { db } from '../lib/db';
+
+const pdo = db();
+
+const rotulos_angulo: Record<string, string> = {
+  nadir: 'Nadir', baixo_orbita: 'Baixo/órbita', reveal_descendente: 'Reveal descendente',
+  travelling_lateral: 'Travelling lateral', outro: 'Outro',
+};
+const rotulos_formato: Record<string, string> = {
+  reveal_paisagem: 'Reveal paisagem', dica_pilotagem: 'Dica de pilotagem',
+  dica_edicao: 'Dica de edição', blooper_bts: 'Blooper/BTS', pessoa_em_cena: 'Pessoa em cena',
+};
+
+const combinacoes = pdo
+  .prepare(
+    `SELECT l.nome AS local_nome, p.angulo_camara, MAX(p.data_publicacao) AS ultima_data, COUNT(*) AS vezes
+     FROM publicacoes p
+     JOIN voos v ON v.id = p.voo_id
+     JOIN locais l ON l.id = v.local_id
+     WHERE p.angulo_camara IS NOT NULL
+     GROUP BY l.id, p.angulo_camara
+     ORDER BY ultima_data ASC`,
+  )
+  .all() as any[];
+
+function mesesDesde(data: string): number {
+  const entao = new Date(data);
+  const agora = new Date();
+  let meses = (agora.getFullYear() - entao.getFullYear()) * 12 + (agora.getMonth() - entao.getMonth());
+  if (agora.getDate() < entao.getDate()) meses -= 1;
+  return Math.max(0, meses);
+}
+
+const ultimas_duas = pdo
+  .prepare('SELECT data_publicacao, formato_conteudo FROM publicacoes ORDER BY data_publicacao DESC, id DESC LIMIT 2')
+  .all() as any[];
+
+let aviso_consecutivo: string | null = null;
+if (
+  ultimas_duas.length === 2 &&
+  ultimas_duas[0].formato_conteudo &&
+  ultimas_duas[0].formato_conteudo === ultimas_duas[1].formato_conteudo
+) {
+  aviso_consecutivo = rotulos_formato[ultimas_duas[0].formato_conteudo] ?? ultimas_duas[0].formato_conteudo;
+}
+---
+<OpsLayout titulo="Alerta de repetição">
+  {aviso_consecutivo && (
+    <div class="mensagem-sucesso" style="border-color:var(--aviso); color:var(--aviso);">
+      Atenção: as duas últimas publicações são ambas do formato "{aviso_consecutivo}". Considera variar no próximo vídeo.
+    </div>
+  )}
+
+  <div class="cartao">
+    <h2>Há quanto tempo não repetem cada ângulo, por local</h2>
+    {combinacoes.length === 0 ? (
+      <p class="vazio">Ainda não há publicações associadas a voos com ângulo de câmara definido.</p>
+    ) : (
+      <table>
+        <tr><th>Local</th><th>Ângulo</th><th>Última vez</th><th>Há quanto tempo</th><th>Vezes usado</th></tr>
+        {combinacoes.map((c: any) => {
+          const m = mesesDesde(c.ultima_data);
+          return (
+            <tr>
+              <td>{c.local_nome}</td>
+              <td>{rotulos_angulo[c.angulo_camara] ?? c.angulo_camara}</td>
+              <td class="texto-suave">{c.ultima_data}</td>
+              <td>{m === 0 ? <span class="pilula aviso">este mês</span> : <>{m} mês{m > 1 ? 'es' : ''}</>}</td>
+              <td class="texto-suave">{c.vezes}</td>
+            </tr>
+          );
+        })}
+      </table>
+    )}
+  </div>
+</OpsLayout>

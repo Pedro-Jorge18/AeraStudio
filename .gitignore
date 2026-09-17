@@ -1,3 +1,5 @@
-db/aera_studio.sqlite
-README.md
+node_modules/
+dist/
+.astro/
 .DS_Store
+Claude outputs/

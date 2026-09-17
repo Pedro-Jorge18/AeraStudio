@@ -1,14 +1,7 @@
-<?php
-declare(strict_types=1);
-
-// Painel de Controlo estratégico do projeto AERA Studio.
-// Conteúdo narrativo (decisões, alertas, especialistas, roteiro) — não vem da base de dados.
-// Traz-se aqui um resumo sempre que houver uma decisão nova (ver "Como manter isto atualizado").
-
-$titulo_pagina = 'Painel de Controlo';
-require __DIR__ . '/../includes/layout_topo.php';
-?>
-
+---
+import OpsLayout from '../layouts/OpsLayout.astro';
+---
+<OpsLayout titulo="Painel de Controlo">
 <div class="painel">
   <p class="lede">Projeto part-time por diversão e portefólio, não um negócio a escalar — os dois são devs de software, e é isso que continua a ser o "trabalho a sério". Vídeo e fotografia aérea com drone, conteúdo geral aberto ao público (Instagram + TikTok), aos fins de semana.</p>
 
@@ -300,4 +293,4 @@ require __DIR__ . '/../includes/layout_topo.php';
   </div>
 </div>
 
-<?php require __DIR__ . '/../includes/layout_fim.php'; ?>
+</OpsLayout>

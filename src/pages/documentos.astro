@@ -1,0 +1,123 @@
+---
+import OpsLayout from '../layouts/OpsLayout.astro';
+import { db, hojeISO, maisDiasISO } from '../lib/db';
+
+const pdo = db();
+let sucesso = false;
+let erro: string | null = null;
+
+if (Astro.request.method === 'POST') {
+  try {
+    const form = await Astro.request.formData();
+    const val = (k: string) => (form.get(k) ?? '').toString();
+    const stmt = pdo.prepare(
+      `INSERT INTO documentos (tipo, nome, entidade_emissora, numero_referencia, data_emissao, data_validade, local_id, notas)
+       VALUES (@tipo, @nome, @entidade, @numero, @data_emissao, @data_validade, @local_id, @notas)`,
+    );
+    stmt.run({
+      tipo: val('tipo'),
+      nome: val('nome').trim(),
+      entidade: val('entidade_emissora').trim() || null,
+      numero: val('numero_referencia').trim() || null,
+      data_emissao: val('data_emissao') || null,
+      data_validade: val('data_validade') || null,
+      local_id: val('local_id') !== '' ? parseInt(val('local_id'), 10) : null,
+      notas: val('notas').trim() || null,
+    });
+    sucesso = true;
+  } catch (e) {
+    erro = 'Não foi possível guardar: ' + (e as Error).message;
+  }
+}
+
+const tipos_rotulos: Record<string, string> = {
+  seguro: 'Seguro de responsabilidade civil',
+  aan: 'Autorização de Operador (AAN)',
+  licenca_piloto: 'Licença de piloto remoto',
+  outro: 'Outro',
+};
+
+const locais = pdo.prepare('SELECT id, nome FROM locais ORDER BY nome ASC').all() as any[];
+
+const documentos = pdo
+  .prepare(
+    `SELECT d.*, l.nome AS local_nome
+     FROM documentos d
+     LEFT JOIN locais l ON l.id = d.local_id
+     ORDER BY (d.data_validade IS NULL), d.data_validade ASC, d.id DESC`,
+  )
+  .all() as any[];
+
+const hoje = hojeISO();
+const limite_a_expirar = maisDiasISO(30);
+
+function estadoDocumento(data_validade: string | null): [string, string] {
+  if (data_validade === null) return ['sem_validade', 'Sem prazo'];
+  if (data_validade < hoje) return ['expirado', 'Expirado'];
+  if (data_validade <= limite_a_expirar) return ['a_expirar', 'A expirar'];
+  return ['valido', 'Válido'];
+}
+---
+<OpsLayout titulo="Documentos">
+  {sucesso && <div class="mensagem-sucesso">Documento registado.</div>}
+  {erro && <div class="mensagem-sucesso" style="border-color:var(--erro); color:var(--erro);">{erro}</div>}
+
+  <div class="cartao">
+    <h2>Novo documento</h2>
+    <form method="post">
+      <label for="tipo">Tipo</label>
+      <select name="tipo" id="tipo" required>
+        {Object.entries(tipos_rotulos).map(([valor, rotulo]) => <option value={valor}>{rotulo}</option>)}
+      </select>
+
+      <label for="nome">Nome / descrição</label>
+      <input type="text" name="nome" id="nome" placeholder="ex: Apólice Coverdrone 2026" required />
+
+      <label for="entidade_emissora">Entidade emissora</label>
+      <input type="text" name="entidade_emissora" id="entidade_emissora" placeholder="ex: Coverdrone, ANAC" />
+
+      <label for="numero_referencia">Número / referência</label>
+      <input type="text" name="numero_referencia" id="numero_referencia" />
+
+      <label for="data_emissao">Data de emissão</label>
+      <input type="date" name="data_emissao" id="data_emissao" />
+
+      <label for="data_validade">Válido até (deixa vazio se não expira)</label>
+      <input type="date" name="data_validade" id="data_validade" />
+
+      <label for="local_id">Local (só se for uma autorização específica de um local)</label>
+      <select name="local_id" id="local_id">
+        <option value="">— Aplica-se a tudo (seguro, licença, etc.) —</option>
+        {locais.map((l: any) => <option value={l.id}>{l.nome}</option>)}
+      </select>
+
+      <label for="notas">Notas</label>
+      <textarea name="notas" id="notas"></textarea>
+
+      <button type="submit">Guardar documento</button>
+    </form>
+  </div>
+
+  <div class="cartao">
+    <h2>Documentos registados</h2>
+    {documentos.length === 0 ? (
+      <p class="vazio">Ainda não há documentos registados. Começa pelo seguro e pela AAN — são os que bloqueiam voos.</p>
+    ) : (
+      <table>
+        <tr><th>Tipo</th><th>Nome</th><th>Local</th><th>Válido até</th><th>Estado</th></tr>
+        {documentos.map((d: any) => {
+          const [estado_classe, estado_rotulo] = estadoDocumento(d.data_validade ?? null);
+          return (
+            <tr>
+              <td class="texto-suave">{tipos_rotulos[d.tipo] ?? d.tipo}</td>
+              <td>{d.nome}</td>
+              <td class="texto-suave">{d.local_nome ?? '— tudo —'}</td>
+              <td class="texto-suave">{d.data_validade ?? '— sem prazo —'}</td>
+              <td><span class={`etiqueta-estado etiqueta-${estado_classe}`}>{estado_rotulo}</span></td>
+            </tr>
+          );
+        })}
+      </table>
+    )}
+  </div>
+</OpsLayout>
