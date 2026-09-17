@@ -9,13 +9,17 @@ $pagina_atual = basename($_SERVER['SCRIPT_NAME'] ?? '');
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($titulo_pagina) ?> · AERA Studio Ops</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,600&display=swap">
     <link rel="stylesheet" href="estilo.css">
 </head>
 <body>
 <header class="topo">
-    <a class="topo-marca" href="index.php">AERA <span>Studio Ops</span></a>
+    <a class="topo-marca" href="index.php">AERA <span>Studio</span></a>
     <nav>
-        <a href="index.php" <?= $pagina_atual === 'index.php' ? 'class="ativo"' : '' ?>>Painel</a>
+        <a href="index.php" class="inicio-link<?= $pagina_atual === 'index.php' ? ' ativo' : '' ?>">Início</a>
+        <a href="painel.php" <?= $pagina_atual === 'painel.php' ? 'class="ativo"' : '' ?>>Painel</a>
         <a href="registar_voo.php" <?= $pagina_atual === 'registar_voo.php' ? 'class="ativo"' : '' ?>>Registar voo</a>
         <a href="registar_publicacao.php" <?= $pagina_atual === 'registar_publicacao.php' ? 'class="ativo"' : '' ?>>Registar publicação</a>
         <a href="locais.php" <?= $pagina_atual === 'locais.php' ? 'class="ativo"' : '' ?>>Locais</a>
