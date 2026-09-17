@@ -142,3 +142,7 @@
 
   @media (max-width:820px){ .maprow{ grid-template-columns:1fr; } .sobre .inner{ grid-template-columns:1fr; } .couple-hero{ display:none; } }
   @media (max-width:720px){ nav.main .link{ display:none; } header#site{ padding-inline:20px; } .grid2,.grid3{ grid-template-columns:1fr; } .cta{ padding:44px 26px; } #alt{ display:none; } }
+
+/* Esconder a barra de scroll nativa em todo o site (o scroll continua a funcionar) */
+html { scrollbar-width: none; -ms-overflow-style: none; }
+html::-webkit-scrollbar { width: 0; height: 0; display: none; }

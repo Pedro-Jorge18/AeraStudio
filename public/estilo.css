@@ -515,3 +515,7 @@ body {
 .resumo-numero .numero { font-family: "Cormorant Garamond", Georgia, serif; }
 /* Botón "Início" destacado en el menú */
 .topo nav a.inicio-link { color: var(--acento); }
+
+/* Esconder a barra de scroll nativa em todo o site (o scroll continua a funcionar) */
+html { scrollbar-width: none; -ms-overflow-style: none; }
+html::-webkit-scrollbar { width: 0; height: 0; display: none; }
