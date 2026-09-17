@@ -13,7 +13,7 @@ export default defineConfig({
   // Se um dia puseres isto público na internet, volta a pôr checkOrigin: true.
   security: { checkOrigin: false },
   vite: {
-    // better-sqlite3 é um módulo nativo — não deve ser empacotado pelo Vite.
-    ssr: { external: ['better-sqlite3'] },
+    // node:sqlite é um módulo embutido do Node — mantém-no externo ao bundle.
+    ssr: { external: ['node:sqlite'] },
   },
 });

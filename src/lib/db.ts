@@ -1,16 +1,16 @@
-import Database from 'better-sqlite3';
+import { DatabaseSync } from 'node:sqlite';
 import path from 'node:path';
 
-// Aponta para a MESMA base de dados que o projeto PHP usava (db/aera_studio.sqlite).
-// Resolvido a partir da raiz do projeto, por isso funciona em `npm run dev` e em produção.
+// Usa o SQLite embutido no Node (node:sqlite) — sem módulos nativos, sem compilação,
+// sem Python nem build tools. Aponta para a MESMA base de dados de sempre.
 const caminhoBd = path.join(process.cwd(), 'db', 'aera_studio.sqlite');
 
-let _db: Database.Database | null = null;
+let _db: DatabaseSync | null = null;
 
-export function db(): Database.Database {
+export function db(): DatabaseSync {
   if (_db) return _db;
-  _db = new Database(caminhoBd);
-  _db.pragma('foreign_keys = ON');
+  _db = new DatabaseSync(caminhoBd);
+  _db.exec('PRAGMA foreign_keys = ON');
   return _db;
 }
 
