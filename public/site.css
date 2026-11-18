@@ -146,3 +146,16 @@
 /* Esconder a barra de scroll nativa em todo o site (o scroll continua a funcionar) */
 html { scrollbar-width: none; -ms-overflow-style: none; }
 html::-webkit-scrollbar { width: 0; height: 0; display: none; }
+/* 🌍 Globo interactivo (tamaño del mapa anterior) */
+.globewrap{
+  position: relative;
+  width: 100%;
+  height: 440px;                 /* altura fija y pequeña */
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  overflow: hidden;              /* recorta el globo dentro de la caja */
+  background: linear-gradient(160deg,#0e1c2e,#0a121f);
+  cursor: grab;
+}
+.globewrap:active{ cursor: grabbing; }
+#globo, #globo canvas{ display: block; width: 100%; height: 100%; }

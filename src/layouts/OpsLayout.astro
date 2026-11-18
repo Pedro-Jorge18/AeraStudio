@@ -19,10 +19,19 @@ const ativo = (p: string) => (path === p ? 'ativo' : '');
   <link rel="stylesheet" href="/estilo.css" />
 </head>
 <body>
+  <div class="drone-orbit" aria-hidden="true"><img src="/img/drone.png" alt="" /></div>
+  <div class="particulas" aria-hidden="true">
+  <span></span><span></span><span></span><span></span><span></span>
+  <span></span><span></span><span></span><span></span><span></span>
+  <span></span><span></span><span></span><span></span>
+</div>
+<div class="cursor-punto" aria-hidden="true"></div>
+<div class="cursor-anillo" aria-hidden="true"></div>
 <header class="topo">
-  <a class="topo-marca" href="/">AERA <span>Studio</span></a>
+  <a class="topo-marca" href="/" aria-label="AERA Studio">
+  <span class="mini-brand"><span class="lbox">A</span><span class="lbox">E</span><span class="lbox">R</span><span class="lbox">A</span></span>
+</a>
   <nav>
-    <a href="/" class={`inicio-link${path === '/' ? ' ativo' : ''}`}>Início</a>
     <a href="/painel" class={ativo('/painel')}>Painel</a>
     <a href="/registar_voo" class={ativo('/registar_voo')}>Registar voo</a>
     <a href="/registar_publicacao" class={ativo('/registar_publicacao')}>Registar publicação</a>
@@ -41,4 +50,70 @@ const ativo = (p: string) => (path === p ? 'ativo' : '');
   <p>AERA Studio Ops — Fase 1</p>
 </footer>
 </body>
+<script>
+  const menosMov = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (!menosMov) {
+    document.querySelectorAll<HTMLElement>('.cartao').forEach((tarjeta) => {
+      const fuerza = 8;
+
+      tarjeta.addEventListener('mousemove', (e: MouseEvent) => {
+        const r = tarjeta.getBoundingClientRect();
+        const x = (e.clientX - r.left) / r.width;
+        const y = (e.clientY - r.top) / r.height;
+
+        const rotY = (x - 0.5) * 2 * fuerza;
+        const rotX = (0.5 - y) * 2 * fuerza;
+
+        tarjeta.style.transform =
+          `perspective(900px) rotateX(${rotX}deg) rotateY(${rotY}deg) translateY(-4px)`;
+      });
+
+      tarjeta.addEventListener('mouseleave', () => {
+        tarjeta.style.transform = '';
+      });
+    });
+  }
+</script>
+<script>
+  window.addEventListener('load', () => {
+    const menosMovimiento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    document.querySelectorAll<HTMLElement>('.resumo-numero .numero').forEach((el) => {
+      const destino = parseInt(el.textContent?.trim() ?? '', 10);
+      if (isNaN(destino)) return;
+
+      if (menosMovimiento) { el.textContent = String(destino); return; }
+
+      const duracion = 1200;
+      const inicio = performance.now();
+
+      function paso(ahora: number){
+        const t = Math.min((ahora - inicio) / duracion, 1);
+        const suave = 1 - Math.pow(1 - t, 3);
+        el.textContent = String(Math.round(destino * suave));
+        if (t < 1) requestAnimationFrame(paso);
+        else el.textContent = String(destino);
+      }
+      requestAnimationFrame(paso);
+    });
+  });
+</script>
+<script>
+  const punto  = document.querySelector<HTMLElement>('.cursor-punto');
+  const anillo = document.querySelector<HTMLElement>('.cursor-anillo');
+
+  if (punto && anillo && window.matchMedia('(pointer: fine)').matches) {
+    window.addEventListener('mousemove', (e: MouseEvent) => {
+      const pos = `translate(${e.clientX}px, ${e.clientY}px) translate(-50%, -50%)`;
+      punto.style.transform  = pos;
+      anillo.style.transform = pos;
+    });
+
+    document.querySelectorAll('a, button, .cartao, .ligacao-modulo').forEach((el) => {
+      el.addEventListener('mouseenter', () => anillo.classList.add('activo'));
+      el.addEventListener('mouseleave', () => anillo.classList.remove('activo'));
+    });
+  }
+</script>
 </html>

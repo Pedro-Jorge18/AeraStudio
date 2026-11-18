@@ -516,6 +516,209 @@ body {
 /* Botón "Início" destacado en el menú */
 .topo nav a.inicio-link { color: var(--acento); }
 
-/* Esconder a barra de scroll nativa em todo o site (o scroll continua a funcionar) */
+/* Esconder a barra de scroll nativa em todo o site (o scroll continua a funcionar ) */
 html { scrollbar-width: none; -ms-overflow-style: none; }
 html::-webkit-scrollbar { width: 0; height: 0; display: none; }
+/* ============================================================
+   MELHORIAS VISUAIS DO PAINEL (elegante + com vida)
+   ============================================================ */
+
+/* 1) TARJETAS: profundidad, línea dorada arriba, esquinita HUD y hover */
+.cartao{
+  position: relative;                /* para colocar la línea y la esquinita */
+  top: 0;                            /* usamos 'top' para el efecto de elevación */
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+  /* textura de puntos dorada MUY sutil (guiño dron/HUD) */
+  background-image: radial-gradient(rgba(202,161,93,0.055) 1px, transparent 1.3px);
+  background-size: 18px 18px;
+  transition: top .25s ease, border-color .25s ease, box-shadow .25s ease;
+}
+.cartao::before{                     /* línea dorada degradada arriba */
+  content:""; position:absolute; top:0; left:0; right:0; height:2px;
+  background: linear-gradient(90deg, transparent, var(--acento), transparent);
+  opacity:.55;
+}
+.cartao::after{                      /* esquinita tipo visor de cámara (arriba-dcha) */
+  content:""; position:absolute; top:10px; right:10px; width:12px; height:12px;
+  border-top:1.5px solid rgba(202,161,93,.45);
+  border-right:1.5px solid rgba(202,161,93,.45);
+}
+.cartao:hover{                       /* al pasar el ratón: sube y se ilumina el borde */
+  top:-4px;
+  border-color: var(--acento);
+  box-shadow: 0 18px 42px rgba(0,0,0,0.40);
+}
+
+/* 2) TÍTULOS editoriales: serif + rayita dorada debajo */
+h1{
+  font-family:"Cormorant Garamond", Georgia, serif;
+  font-size: 34px; font-weight:600; letter-spacing:.01em;
+  position:relative; padding-bottom:14px;
+}
+h1::after{
+  content:""; position:absolute; left:0; bottom:0;
+  width:56px; height:3px; border-radius:2px; background:var(--acento);
+}
+h2{ font-family:"Cormorant Garamond", Georgia, serif; font-size:21px; font-weight:600; }
+
+/* 3) ENTRADA suave al cargar (las tarjetas aparecen subiendo) */
+@keyframes cartaoIn{
+  from{ opacity:0; transform: translateY(14px); }
+  to  { opacity:1; transform: translateY(0); }
+}
+.cartao{ animation: cartaoIn .5s ease both; }
+.grelha-resumo > *:nth-child(1){ animation-delay:.05s; }
+.grelha-resumo > *:nth-child(2){ animation-delay:.12s; }
+.grelha-resumo > *:nth-child(3){ animation-delay:.19s; }
+.grelha-resumo > *:nth-child(4){ animation-delay:.26s; }
+
+/* Respeto a quien prefiere menos movimiento */
+@media (prefers-reduced-motion: reduce){
+  .cartao{ animation:none; }
+  .cartao:hover{ top:0; }
+}
+/* ============================================================
+   ESSÊNCIA DO INÍCIO NO PAINEL (mais vida + marca)
+   ============================================================ */
+
+/* Atmósfera: brillo dorado sutil arriba (como la landing) */
+body::before{
+  content:""; position:fixed; inset:0; pointer-events:none; z-index:0;
+  background: radial-gradient(900px 500px at 85% -10%, rgba(202,161,93,0.07), transparent 60%);
+}
+.topo, .conteudo, .rodape{ position:relative; z-index:1; }  /* contenido por encima del brillo */
+
+/* Logo en cuadritos A·E·R·A (igual que el inicio) */
+.mini-brand{ display:inline-flex; gap:5px; align-items:center; }
+.mini-brand .lbox{
+  width:26px; height:26px; display:flex; align-items:center; justify-content:center;
+  border:1.5px solid var(--acento); border-radius:5px;
+  background:rgba(202,161,93,0.06); color:#f4f1ea;
+  font-family:"Space Grotesk", sans-serif; font-weight:700; font-size:14px;
+  transition: transform .2s ease;
+}
+.topo-marca:hover .lbox{ transform: translateY(-2px); }   /* saltito al pasar el ratón */
+
+/* Menú: subrayado dorado que crece al pasar el ratón */
+.topo nav a{ position:relative; }
+.topo nav a::after{
+  content:""; position:absolute; left:0; right:0; bottom:-5px; height:2px;
+  background:var(--acento); transform:scaleX(0); transform-origin:left;
+  transition:transform .22s ease;
+}
+.topo nav a:hover::after, .topo nav a.ativo::after{ transform:scaleX(1); }
+
+/* Enlaces de acción ("Registar novo voo →") que se deslizan */
+.ligacao-modulo{ display:inline-block; transition: transform .2s ease, color .2s ease; }
+.ligacao-modulo:hover{ transform: translateX(5px); color: var(--acento); }
+
+/* Filas de listas que se resaltan */
+.lista-simples li{ border-radius:6px; transition: background .2s ease, padding-left .2s ease; }
+.lista-simples li:hover{ background: rgba(202,161,93,0.06); padding-left:8px; }
+
+/* Etiquetas de los números en mayúsculas espaciadas (más pro) */
+.resumo-numero .rotulo{ text-transform:uppercase; letter-spacing:.12em; font-size:11px; }
+/* 🚁 Dron volando por toda la pantalla */
+.drone-orbit{
+  position: fixed; top: 0; left: 0; z-index: 4; pointer-events: none;
+  animation: voar 28s ease-in-out infinite;
+}
+.drone-orbit img{
+  display:block; width: 72px; opacity:.6;
+  filter: drop-shadow(0 8px 16px rgba(0,0,0,.45));
+  animation: baloico 4s ease-in-out infinite;   /* balanceo suave, como si volara */
+}
+/* La RUTA por la pantalla (cada % es un punto por donde pasa) */
+@keyframes voar{
+  0%   { transform: translate(6vw, 16vh)  rotate(-4deg); }
+  20%  { transform: translate(72vw, 8vh)  rotate(6deg); }
+  40%  { transform: translate(80vw, 60vh) rotate(-3deg); }
+  60%  { transform: translate(38vw, 76vh) rotate(4deg); }
+  80%  { transform: translate(9vw, 52vh)  rotate(-5deg); }
+  100% { transform: translate(6vw, 16vh)  rotate(-4deg); }
+}
+@keyframes baloico{ 0%,100%{ transform: translateY(0); } 50%{ transform: translateY(-8px); } }
+
+@media (prefers-reduced-motion: reduce){ .drone-orbit{ animation:none; } }
+/* 📸 Cursor tipo "punto de enfoque" de cámara */
+@media (pointer: fine){
+  body{ cursor: none; }   /* escondemos la flecha normal */
+
+  .cursor-punto, .cursor-anillo{
+    position: fixed;
+    top: 0; left: 0;
+    border-radius: 50%;
+    pointer-events: none;   /* nunca estorba al hacer clic */
+    z-index: 9999;
+  }
+  .cursor-punto{
+    width: 6px; height: 6px;
+    background: var(--acento);
+  }
+  .cursor-anillo{
+    width: 30px; height: 30px;
+    border: 1.5px solid var(--acento);
+    opacity: .6;
+    transition: transform .12s ease, width .2s ease, height .2s ease, opacity .2s ease, background .2s ease;
+  }
+  /* al pasar por algo clicable, el anillo "enfoca" */
+  .cursor-anillo.activo{
+    width: 46px; height: 46px;
+    opacity: 1;
+    background: rgba(202,161,93,.08);
+  }
+}
+/* ✨ Partículas doradas suaves de fondo */
+.particulas{
+  position: fixed;
+  inset: 0;
+  z-index: -1;              /* detrás del contenido, encima del fondo */
+  pointer-events: none;    /* no molesta al hacer clic */
+  overflow: hidden;
+}
+.particulas span{
+  position: absolute;
+  bottom: -12px;
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--acento);                        /* tu dorado */
+  box-shadow: 0 0 8px 2px rgba(202,161,93,.45);    /* brillito */
+  opacity: 0;
+  animation: subir linear infinite;
+}
+
+/* cada puntito sale de un lugar distinto, a su ritmo */
+.particulas span:nth-child(1){ left: 5%;  animation-duration: 16s; animation-delay: 0s;  }
+.particulas span:nth-child(2){ left: 14%; animation-duration: 20s; animation-delay: 5s;  width:4px; height:4px; }
+.particulas span:nth-child(3){ left: 23%; animation-duration: 14s; animation-delay: 2s;  }
+.particulas span:nth-child(4){ left: 32%; animation-duration: 22s; animation-delay: 8s;  width:3px; height:3px; }
+.particulas span:nth-child(5){ left: 41%; animation-duration: 18s; animation-delay: 3s;  }
+.particulas span:nth-child(6){ left: 50%; animation-duration: 24s; animation-delay: 10s; width:6px; height:6px; }
+.particulas span:nth-child(7){ left: 59%; animation-duration: 15s; animation-delay: 1s;  }
+.particulas span:nth-child(8){ left: 68%; animation-duration: 21s; animation-delay: 6s;  width:4px; height:4px; }
+.particulas span:nth-child(9){ left: 77%; animation-duration: 17s; animation-delay: 4s;  }
+.particulas span:nth-child(10){ left: 86%; animation-duration: 23s; animation-delay: 9s; width:3px; height:3px; }
+.particulas span:nth-child(11){ left: 92%; animation-duration: 19s; animation-delay: 2s; }
+.particulas span:nth-child(12){ left: 38%; animation-duration: 26s; animation-delay: 12s; width:5px; height:5px; }
+.particulas span:nth-child(13){ left: 62%; animation-duration: 25s; animation-delay: 7s; }
+.particulas span:nth-child(14){ left: 18%; animation-duration: 28s; animation-delay: 11s; width:4px; height:4px; }
+
+@keyframes subir{
+  0%   { transform: translateY(0) translateX(0);   opacity: 0; }
+  10%  { opacity: .55; }
+  50%  { transform: translateY(-45vh) translateX(14px); }
+  90%  { opacity: .4; }
+  100% { transform: translateY(-100vh) translateX(-10px); opacity: 0; }
+}
+
+/* si alguien prefiere menos movimiento, se quedan quietos y tenues */
+@media (prefers-reduced-motion: reduce){
+  .particulas span{ animation: none; opacity: .2; }
+}
+/* 🃏 Tarjetas 3D que siguen al ratón */
+.cartao{
+  transform-style: preserve-3d;
+  transition: transform .18s ease;   /* suaviza el movimiento */
+  will-change: transform;            /* le avisa al navegador para que vaya fluido */
+}
